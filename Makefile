@@ -1,7 +1,5 @@
 OPT:= -g -std=c++11 
-INC:=$(INC) -I./ -I/${HOME}/include
 CXX:= g++
-INSTALLPATH:=$(HOME)/bin
 LIBS:= -L/${HOME}/lib -lmidifile
 ARGS:= $(OPT) $(INC)
 
@@ -23,4 +21,4 @@ graph: graph.cpp
 
 clean : 
 	rm -f $(OBJFILES) note_to_midi
-
+	rm -f $(OBJFILE) graph
