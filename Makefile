@@ -1,28 +1,26 @@
-
 OPT:= -g -std=c++11 
-INC:=$(INC) -I./ -I/${HOME}/include
+INC:=$(INC) -I./ -I/${HOME}/midifile/include
 CXX:= g++
-INSTALLPATH:=$(HOME)/bin
-LIBS:= -L/${HOME}/lib -lmidifile
+INSTALLPATH:=$(HOME)/midifile/bin
+LIBS:= -L/${HOME}/midifile/lib -lmidifile
 
 ARGS:= $(OPT) $(INC)
 TOMIDI= note_to_midi.o
 OBJFILES= $(OTHER)
 
-all : note_to_midi graph
+all : main
 
-graph: graph.cpp
-	g++ -std=c++11 -o graph graph.cpp
+main.o: graph.cpp main.cpp
+	g++ -g -std=c++11 $(INC) -c main.cpp
 
+main: main.o
+	g++ -g -std=c++11 $(INC) -o main main.o $(LIBS)
 
-note_to_midi : $(TOMIDI)	
-	$(CXX) $(ARGS) -o note_to_midi $(OBJFILES) $(TOMIDI) $(LIBS)
+#note_to_midi : $(TOMIDI)	
+	#$(CXX) $(ARGS) -o note_to_midi main.o $(LIBS)
 
-%.o : %.cpp
-	$(CXX) $(ARGS) -c $*.cpp
+#%.o : %.cpp
+	#$(CXX) $(ARGS) -c main.cpp
 
 clean : 
-	rm -f $(OBJFILES) note_to_midi
-	rm -f $(OBJFILES) graph
-	rm -f $(OBJFILES) *.o
-
+	rm *.o
