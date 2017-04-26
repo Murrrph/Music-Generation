@@ -129,7 +129,7 @@ int main()
 	MidiFile outputfile;        // create an empty MIDI file with one track
    	outputfile.absoluteTicks();  // time information stored as absolute time
                                // (will be coverted to delta time when written)
-   	outputfile.addTrack(3);     // Add another three tracks to the MIDI file
+   	outputfile.addTrack(1);     // Add another three tracks to the MIDI file
    	vector<uchar> midievent;     // temporary storage for MIDI events
    	midievent.resize(3);        // set the size of the array to 3 bytes
    	int tpq = 120;              // default value in MIDI file is 48
@@ -143,17 +143,17 @@ int main()
    	}
 
    	vector<int> voice1;
-   	vector<int> voice2;
-   	vector<int> voice3;
-
+   	//vector<int> voice2;
+   	//vector<int> voice3;
+/*
    	for (unsigned i=2; i<note_values.size(); i+=3)
    		voice1.push_back(note_values[i]);
 
    	for (unsigned i=1; i<note_values.size(); i+=3)
    		voice2.push_back(note_values[i]);
-
-   	for (unsigned i=0; i<note_values.size(); i+=3)
-   		voice3.push_back(note_values[i]);
+*/
+   	for (unsigned i=0; i<note_values.size(); i+=1)
+   		voice1.push_back(note_values[i]);
 
    	vector<double> rhythm1(voice1.size());
    	vector<double> note_lengths{0.5, 1.0, 2.0};
@@ -164,8 +164,8 @@ int main()
    	rhythm1[rhythm1.size()-2] = 4.0;  // end on whole note
    	rhythm1[rhythm1.size()-1] = -1.0; // -1 to stop reading
 
-   	vector<double> rhythm2 = rhythm1;
-   	vector<double> rhythm3 = rhythm1;
+   	//vector<double> rhythm2 = rhythm1;
+   	//vector<double> rhythm3 = rhythm1;
 
    	// store a melody line in track 1 (track 0 left empty for conductor info)
    	int i=0;
@@ -180,7 +180,7 @@ int main()
       	outputfile.addEvent(1, actiontime, midievent);
       	i++;
    	}
-
+/*
    	// store a base line in track 2
    	i=0;
    	actiontime = 0;          // reset time for beginning of file
@@ -208,7 +208,7 @@ int main()
       	outputfile.addEvent(3, actiontime, midievent);
       	i++;
    	}
-
+*/
    	outputfile.sortTracks();         // make sure data is in correct order
    	outputfile.write("song.mid"); // write Standard MIDI File
 
