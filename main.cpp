@@ -2,6 +2,7 @@
 #include <fstream>
 #include "MidiFile.h"
 #include "graph.cpp"
+#include "NoteTypeList.cpp"
 using namespace std;
 
 typedef unsigned char uchar;
@@ -156,10 +157,11 @@ int main()
    		voice1.push_back(note_values[i]);
 
    	vector<double> rhythm1(voice1.size());
-   	vector<double> note_lengths{0.5, 1.0, 2.0};
+   	//vector<double> note_lengths{0.5, 1.0, 2.0};
 
+	NoteTypeList ntl;
    	for (unsigned i=0; i<rhythm1.size()-2; i++)
-   		rhythm1[i] = note_lengths[rand() % 2]; // randomly generate eight, quarter or half note
+   		rhythm1[i] = ntl.getNextNote(); // generate half, quarter, eighth, or sixteenth notes
    	
    	rhythm1[rhythm1.size()-2] = 4.0;  // end on whole note
    	rhythm1[rhythm1.size()-1] = -1.0; // -1 to stop reading
