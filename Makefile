@@ -10,7 +10,7 @@ OBJFILES= $(OTHER)
 
 all : main
 
-main.o: graph.cpp main.cpp
+main.o: graph.cpp main.cpp NoteTypeList.cpp
 	g++ -g -std=c++11 $(INC) -c main.cpp
 
 main: main.o
