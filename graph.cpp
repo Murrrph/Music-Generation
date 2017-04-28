@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <map>
+#include <math.h>
 
 using namespace std;
 
@@ -33,8 +34,8 @@ class Graph{
 		void addNode(int note);
 		void makeAnEdge(Node * first, Node * second);
 		void makeEdges();
-		Node getNode(int index); //use .note
-		int getSize();//just returns using all_notes.size
+		void changeOctave(int delta);
+		void normalizeEdgeWeights(Node *);
 };
 
 Graph::Graph(){
@@ -52,17 +53,36 @@ void Graph::addNode(int number){
 	size += 1;
 }
 
+void Graph::normalizeEdgeWeights(Node *node)
+{
+	double totalWeight = 0;
+	for(auto it=node->edges.begin(); it!=node->edges.end(); it++)
+	{
+		totalWeight += it->second; // add weight of current node
+	}
+	
+	for(auto it=node->edges.begin(); it!=node->edges.end(); it++)
+	{
+		it->second = it->second / totalWeight;
+	}
+}
 
-void Graph::makeAnEdge(Node * first, Node * second){
+void Graph::makeAnEdge(Node * first, Node * second)
+{
+	double numToPush_first = (first->edges.size() != 0) ? 1.0/(first->edges.size()) : 1;
+	double numToPush_second = (second->edges.size() != 0) ? 1.0/(second->edges.size()) : 1;
+
 	if(first->note == second->note)
 	{
-		first->edges.insert(pair<Node*, double>(second, 1.0));
+		first->edges.insert(pair<Node*, double>(second, numToPush_first));
 	}
 	else
 	{
-		first->edges.insert(pair<Node*, double>(second, 1.0));
-		second->edges.insert(pair<Node*, double>(first, 1.0));
+		first->edges.insert(pair<Node*, double>(second, numToPush_first));
+		second->edges.insert(pair<Node*, double>(first, numToPush_second));
 	}
+	normalizeEdgeWeights(first);
+	normalizeEdgeWeights(second);
 }
 
 // connect each node to (2) before it and (2) after it
@@ -77,39 +97,29 @@ void Graph::makeEdges(){
 				makeAnEdge(&all_nodes[i], &all_nodes[i+count]); // connect a node to another node
 		}
 	}
+}
 
-	// for testing: outputs nodes and their edges
-	/*for(int i = 0; i < all_nodes.size(); i ++)
+void Graph::changeOctave(int delta)
+{
+	for(int i = 0; i < all_nodes.size(); i++)
 	{
-		cout << all_nodes[i].note << ":" << all_nodes[i].edges.size() << endl;
-		for(int j=0; j<all_nodes[i].edges.size(); j++)
-			cout << "  " << all_nodes[i].edges[j]->note << ", ";
-		cout << endl;
-	}*/
-}
-
-Node Graph::getNode(int index){
-	return all_nodes[index];
-}
-
-int Graph::getSize(){
-	return all_nodes.size();
+		all_nodes[i].note += delta*12;
+	}
 }
 
 // randomly selects a node connected to the current node
 Node * Graph::getNextNode(){
 	double random = (double)rand() / (double)RAND_MAX;
 
-	
-
-	int counter = 0; 
-	for(auto currEdge = current_node->edges.begin(); currEdge != current_node->edges.end(); currEdge++){
-
+	double counter = 0; 
+	for(auto currEdge = current_node->edges.begin(); currEdge != current_node->edges.end(); currEdge++)
+	{
 		if(random < currEdge->second + counter){
+			current_node = currEdge->first;
 			return currEdge->first;
 		}
 		counter += currEdge->second;
-
 	}
+
 	return NULL;
 }
