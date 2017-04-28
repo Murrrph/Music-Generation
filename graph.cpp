@@ -5,6 +5,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <fstream>
+#include <map>
 
 using namespace std;
 
@@ -13,7 +14,7 @@ static int NUM_CONNECTED = 2;
 struct Node{
 
 	int note; //C=60
-	vector<Node*> edges; //adjacency list
+	map<Node*, double> edges; //adjacency list
 
 };
 
@@ -55,12 +56,12 @@ void Graph::addNode(int number){
 void Graph::makeAnEdge(Node * first, Node * second){
 	if(first->note == second->note)
 	{
-		first->edges.push_back(second);
+		first->edges.insert(pair<Node*, double>(second, 1.0));
 	}
 	else
 	{
-		first->edges.push_back(second);
-		second->edges.push_back(first);
+		first->edges.insert(pair<Node*, double>(second, 1.0));
+		second->edges.insert(pair<Node*, double>(first, 1.0));
 	}
 }
 
@@ -97,8 +98,18 @@ int Graph::getSize(){
 
 // randomly selects a node connected to the current node
 Node * Graph::getNextNode(){
-	int random = rand() % (current_node->edges.size());	
+	double random = (double)rand() / (double)RAND_MAX;
 
-	current_node = current_node->edges[random];
-	return current_node;
+	
+
+	int counter = 0; 
+	for(auto currEdge = current_node->edges.begin(); currEdge != current_node->edges.end(); currEdge++){
+
+		if(random < currEdge->second + counter){
+			return currEdge->first;
+		}
+		counter += currEdge->second;
+
+	}
+	return NULL;
 }
