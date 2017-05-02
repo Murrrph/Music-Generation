@@ -124,7 +124,7 @@ int main()
 		melody.push_back(pointer);
 		
 		int number = pointer->note;
-		cout << number << endl;
+		//cout << number << endl;
 		notes_in_song.push_back(number);
 
 	}
@@ -144,7 +144,7 @@ int main()
 
 		Node * pointer = scaleGraphToUse->getNextNode();
 		int number = pointer->note;
-		cout << number << endl;
+		//cout << number << endl;
 		notes_in_song.push_back(number);
 	}
 
@@ -191,6 +191,8 @@ int main()
    	for (unsigned i=0; i<note_values.size(); i+=3)
    		voice3.push_back(note_values[i]+12);		// THE +12 PUTS IT AT AN OCTAVE HIGHER
 
+   	voice3[voice3.size()-1] = -1; // NOTE: voice3 was put at an octave higher (+12) so it's sentinel -1 became 11
+
    	vector<double> rhythm1(voice1.size());
    	vector<double> rhythm2(voice2.size());
    	vector<double> rhythm3(voice3.size());
@@ -221,10 +223,13 @@ int main()
    	int i=0;
    	int actiontime = 0;          // reset time for beginning of file
    	midievent[2] = 64;
-   	while (voice3[i] >= 0) {
+   	while (voice3[i] > 0) {
       	midievent[0] = 0x90;
       	midievent[1] = voice3[i];
-      	midievent[2] += (rand() % 10) - 5;
+
+      	cout << voice3[i] << endl;
+
+      	midievent[2] += (rand() % 10) - 5;			// change note velocity (really the volume)
       	if(rand() % 100 < 3)
       		midievent[2] += (rand() % 30) - 15;
       	if(midievent[2] < 30)
@@ -243,7 +248,7 @@ int main()
    	i=0;
    	actiontime = 0;          // reset time for beginning of file
    	midievent[2] = 64;
-   	while (voice2[i] >= 0  && actiontime < maxActionTime) {
+   	while (voice2[i] > 0  && actiontime < maxActionTime) {
       	midievent[0] = 0x90;
       	midievent[1] = voice2[i];
       	midievent[2] += (rand() % 10) - 5;
@@ -264,7 +269,7 @@ int main()
    	i=0;
    	actiontime = 0;      // temporary storage for MIDI event time
    	midievent[2] = 64;       // store attack/release velocity for note command
-   	while (voice1[i] >= 0 && actiontime < maxActionTime) {
+   	while (voice1[i] > 0 && actiontime < maxActionTime) {
      	midievent[0] = 0x90;     // store a note on command (MIDI channel 1)
       	midievent[1] = voice1[i];
       	midievent[2] += (rand() % 6) - 3;
