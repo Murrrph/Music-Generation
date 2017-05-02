@@ -22,7 +22,6 @@ int A = 69;
 int AS = 70; // A Sharp
 int B = 71;
 
-
 int main()
 {
 	srand(time(NULL));
@@ -149,8 +148,6 @@ int main()
 		notes_in_song.push_back(number);
 	}
 
-	
-	
 	ofstream ost;
 	ost.open("notes.txt");
 	for(int i = 0; i < notes_in_song.size(); i++){
@@ -218,6 +215,8 @@ int main()
    	rhythm3[rhythm3.size()-2] = 4.0;
    	rhythm3[rhythm3.size()-1] = -1.0;
 
+
+
    	// store a base line in track 3
    	int i=0;
    	int actiontime = 0;          // reset time for beginning of file
@@ -225,6 +224,13 @@ int main()
    	while (voice3[i] >= 0) {
       	midievent[0] = 0x90;
       	midievent[1] = voice3[i];
+      	midievent[2] += (rand() % 10) - 5;
+      	if(rand() % 100 < 3)
+      		midievent[2] += (rand() % 30) - 15;
+      	if(midievent[2] < 30)
+      		midievent[2] = 60;
+      	if(midievent[2] > 90)
+      		midievent[2] = 70;
       	outputfile.addEvent(3, actiontime, midievent);
       	actiontime += tpq * rhythm3[i];
       	midievent[0] = 0x80;
@@ -240,6 +246,13 @@ int main()
    	while (voice2[i] >= 0  && actiontime < maxActionTime) {
       	midievent[0] = 0x90;
       	midievent[1] = voice2[i];
+      	midievent[2] += (rand() % 10) - 5;
+      	if(rand() % 100 < 3)
+      		midievent[2] += (rand() % 30) - 15;
+      	if(midievent[2] < 30)
+      		midievent[2] = 60;
+      	if(midievent[2] > 90)
+      		midievent[2] = 70;
       	outputfile.addEvent(2, actiontime, midievent);
       	actiontime += tpq * rhythm2[i];
       	midievent[0] = 0x80;
@@ -254,6 +267,11 @@ int main()
    	while (voice1[i] >= 0 && actiontime < maxActionTime) {
      	midievent[0] = 0x90;     // store a note on command (MIDI channel 1)
       	midievent[1] = voice1[i];
+      	midievent[2] += (rand() % 6) - 3;
+      	if(midievent[2] < 30)
+      		midievent[2] = 60;
+      	if(midievent[2] > 90)
+      		midievent[2] = 70;
       	outputfile.addEvent(1, actiontime, midievent);
       	actiontime += tpq * rhythm1[i];
       	midievent[0] = 0x80;     // store a note on command (MIDI channel 1)
