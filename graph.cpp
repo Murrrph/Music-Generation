@@ -26,6 +26,7 @@ class Graph{
 		vector<Node> all_nodes;
 		int size;	
 		Node * current_node; //pointer to current node
+		int octaveDistance;
 
 	public:	
 		
@@ -40,6 +41,7 @@ class Graph{
 
 Graph::Graph(){
 	size = 0;
+	octaveDistance = 0;
 }
 
 void Graph::addNode(int number){
@@ -101,9 +103,13 @@ void Graph::makeEdges(){
 
 void Graph::changeOctave(int delta)
 {
-	for(int i = 0; i < all_nodes.size(); i++)
+	if(octaveDistance+delta <= 3 && octaveDistance+delta >= -2)
 	{
-		all_nodes[i].note += delta*12;
+		for(int i = 0; i < all_nodes.size(); i++)
+		{
+			all_nodes[i].note += delta*12;
+		}
+		octaveDistance += delta;
 	}
 }
 
