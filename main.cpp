@@ -117,8 +117,10 @@ int main()
 
 	vector<Node *> melody;
 
-	for(int i = 0; i < 6; i++){
-		Node * pointer = someScale.getNextNode();
+	Graph *scaleGraphToUse = &someScale;
+
+	for(int i = 0; i < 10; i++){
+		Node * pointer = scaleGraphToUse->getNextNode();
 			
 		melody.push_back(pointer);
 		
@@ -128,20 +130,20 @@ int main()
 
 	}
 	
-	for(int i = 0; i < 5; i++){
+	for(int i = 0; i < melody.size()-1; i++){
 		//double weight = melody[i]->edges[melody[2]];
-		melody[i]->edges[melody[i+1]] += .3;
-		someScale.normalizeEdgeWeights(melody[i]);
+		melody[i]->edges[melody[i+1]] += .5;
+		scaleGraphToUse->normalizeEdgeWeights(melody[i]);
 	}
 
-	for(int j = 0; j < 60; j++){
+	for(int j = 0; j < 120; j++){
 		// change octave possible
 		if((double)rand() / (double)RAND_MAX < 0.05)
-			someScale.changeOctave(1);
+			scaleGraphToUse->changeOctave(1);
 		else if((double)rand() / (double)RAND_MAX < 0.05)
-			someScale.changeOctave(-1);
+			scaleGraphToUse->changeOctave(-1);
 
-		Node * pointer = someScale.getNextNode();
+		Node * pointer = scaleGraphToUse->getNextNode();
 		int number = pointer->note;
 		cout << number << endl;
 		notes_in_song.push_back(number);
@@ -183,47 +185,59 @@ int main()
    	vector<int> voice2;
    	vector<int> voice3;
 
-   	for (unsigned i=2; i<note_values.size(); i+=1)
+   	for (unsigned i=0; i<note_values.size(); i+=1)
    		voice1.push_back(note_values[i]);
 
-   	for (unsigned i=1; i<note_values.size(); i+=2)
+   	for (unsigned i=0; i<note_values.size(); i+=2)
    		voice2.push_back(note_values[i]);
 
    	for (unsigned i=0; i<note_values.size(); i+=3)
-   		voice3.push_back(note_values[i]);
+   		voice3.push_back(note_values[i]+12);		// THE +12 PUTS IT AT AN OCTAVE HIGHER
 
    	vector<double> rhythm1(voice1.size());
-   	vector<double> note_lengths{0.5, 1.0, 2.0};
+   	vector<double> rhythm2(voice2.size());
+   	vector<double> rhythm3(voice3.size());
+   	//vector<double> note_lengths{0.5, 1.0, 2.0};
 
-   	NoteTypeList ntl;
+   	NoteTypeList *ntl = new NoteTypeList(BASE_LIST);
    	for (unsigned i=0; i<rhythm1.size()-2; i++)
-   		rhythm1[i] = ntl.getNextNote(); // randomly generate eight, quarter or half note
-   	
+   		rhythm1[i] = ntl->getNextNote(); // randomly generate a note type (half, quarter, etc...)
+
+   	NoteTypeList *ntl_mid = new NoteTypeList(MID_LIST);
+   	for (unsigned i=0; i<rhythm2.size()-2; i++)
+   		rhythm2[i] = ntl_mid->getNextNote();
+
+   	NoteTypeList *ntl_melody = new NoteTypeList(MELODY_LIST);
+   	for (unsigned i=0; i<rhythm3.size()-2; i++)
+   		rhythm3[i] = ntl_melody->getNextNote();
+
    	rhythm1[rhythm1.size()-2] = 4.0;  // end on whole note
    	rhythm1[rhythm1.size()-1] = -1.0; // -1 to stop reading
+   	rhythm2[rhythm2.size()-2] = 4.0;
+   	rhythm2[rhythm2.size()-1] = -1.0;
+   	rhythm3[rhythm3.size()-2] = 4.0;
+   	rhythm3[rhythm3.size()-1] = -1.0;
 
-   	vector<double> rhythm2 = rhythm1;
-   	vector<double> rhythm3 = rhythm1;
-
-   	// store a melody line in track 1 (track 0 left empty for conductor info)
+   	// store a base line in track 3
    	int i=0;
-   	int actiontime = 0;      // temporary storage for MIDI event time
-   	midievent[2] = 64;       // store attack/release velocity for note command
-   	while (voice1[i] >= 0) {
-     	midievent[0] = 0x90;     // store a note on command (MIDI channel 1)
-      	midievent[1] = voice1[i];
-      	outputfile.addEvent(1, actiontime, midievent);
-      	actiontime += tpq * rhythm1[i];
-      	midievent[0] = 0x80;     // store a note on command (MIDI channel 1)
-      	outputfile.addEvent(1, actiontime, midievent);
+   	int actiontime = 0;          // reset time for beginning of file
+   	midievent[2] = 64;
+   	while (voice3[i] >= 0) {
+      	midievent[0] = 0x90;
+      	midievent[1] = voice3[i];
+      	outputfile.addEvent(3, actiontime, midievent);
+      	actiontime += tpq * rhythm3[i];
+      	midievent[0] = 0x80;
+      	outputfile.addEvent(3, actiontime, midievent);
       	i++;
    	}
+   	int maxActionTime = actiontime;
 
    	// store a base line in track 2
    	i=0;
    	actiontime = 0;          // reset time for beginning of file
    	midievent[2] = 64;
-   	while (voice2[i] >= 0) {
+   	while (voice2[i] >= 0  && actiontime < maxActionTime) {
       	midievent[0] = 0x90;
       	midievent[1] = voice2[i];
       	outputfile.addEvent(2, actiontime, midievent);
@@ -233,17 +247,17 @@ int main()
       	i++;
    	}
 
-   	// store a base line in track 3
+   	// store a melody line in track 1 (track 0 left empty for conductor info)
    	i=0;
-   	actiontime = 0;          // reset time for beginning of file
-   	midievent[2] = 64;
-   	while (voice3[i] >= 0) {
-      	midievent[0] = 0x90;
-      	midievent[1] = voice3[i];
-      	outputfile.addEvent(3, actiontime, midievent);
-      	actiontime += tpq * rhythm3[i];
-      	midievent[0] = 0x80;
-      	outputfile.addEvent(3, actiontime, midievent);
+   	actiontime = 0;      // temporary storage for MIDI event time
+   	midievent[2] = 64;       // store attack/release velocity for note command
+   	while (voice1[i] >= 0 && actiontime < maxActionTime) {
+     	midievent[0] = 0x90;     // store a note on command (MIDI channel 1)
+      	midievent[1] = voice1[i];
+      	outputfile.addEvent(1, actiontime, midievent);
+      	actiontime += tpq * rhythm1[i];
+      	midievent[0] = 0x80;     // store a note on command (MIDI channel 1)
+      	outputfile.addEvent(1, actiontime, midievent);
       	i++;
    	}
 
