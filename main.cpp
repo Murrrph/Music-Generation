@@ -115,6 +115,25 @@ int main()
 
 	vector<int> notes_in_song;
 
+	vector<Node *> melody;
+
+	for(int i = 0; i < 6; i++){
+		Node * pointer = someScale.getNextNode();
+			
+		melody.push_back(pointer);
+		
+		int number = pointer->note;
+		cout << number << endl;
+		notes_in_song.push_back(number);
+
+	}
+	
+	for(int i = 0; i < 5; i++){
+		//double weight = melody[i]->edges[melody[2]];
+		melody[i]->edges[melody[i+1]] += .3;
+		someScale.normalizeEdgeWeights(melody[i]);
+	}
+
 	for(int j = 0; j < 60; j++){
 		// change octave possible
 		if((double)rand() / (double)RAND_MAX < 0.05)
@@ -127,6 +146,8 @@ int main()
 		cout << number << endl;
 		notes_in_song.push_back(number);
 	}
+
+	
 	
 	ofstream ost;
 	ost.open("notes.txt");
@@ -162,10 +183,10 @@ int main()
    	vector<int> voice2;
    	vector<int> voice3;
 
-   	for (unsigned i=2; i<note_values.size(); i+=3)
+   	for (unsigned i=2; i<note_values.size(); i+=1)
    		voice1.push_back(note_values[i]);
 
-   	for (unsigned i=1; i<note_values.size(); i+=3)
+   	for (unsigned i=1; i<note_values.size(); i+=2)
    		voice2.push_back(note_values[i]);
 
    	for (unsigned i=0; i<note_values.size(); i+=3)
