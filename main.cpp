@@ -1,3 +1,10 @@
+/*
+ *This file contains the implementation for each of the scales, generates the rhythm using functions from the NoteTypeList class, generates the
+ *notes using functions and datatypes from graph.cpp, and uses the Midifile library to write a midifile. We also have code that
+ *varies the volume of the music and uses the first 10 notes of the song to vary the weights between the notes, creating a melody throughout the 
+ *song
+ */
+
 #include <iostream>
 #include <fstream>
 #include "MidiFile.h"
@@ -9,6 +16,8 @@ typedef unsigned char uchar;
 
 int octaveDiff = 12;
 
+
+//Assigns integers to different note values depending on the MIDI standard
 int C = 60;
 int CS = 61; // C Sharp
 int D = 62;
@@ -25,7 +34,7 @@ int B = 71;
 int main()
 {
 	srand(time(NULL));
-
+	//construct various scales to be used later in the program
 	Graph C_scale;
 	C_scale.addNode(C - octaveDiff);
 	C_scale.addNode(D - octaveDiff);
@@ -112,13 +121,15 @@ int main()
 	someScale.addNode(G);
 	someScale.makeEdges();
 
-	vector<int> notes_in_song;
+	vector<int> notes_in_song; //vector of notes in the song, in sequential order
 
-	vector<Node *> melody;
+	vector<Node *> melody;//vector of node pointers used to construct the melody
 
-	Graph *scaleGraphToUse = &someScale;
+	Graph *scaleGraphToUse = &someScale;	//pointer to the scale to use
 
+	//pushes back an initial 10 nodes to be used to seed the melody. Also stores the pointers so we can easily access the nodes later to change their probabilities
 	for(int i = 0; i < 10; i++){
+		
 		Node * pointer = scaleGraphToUse->getNextNode();
 			
 		melody.push_back(pointer);
@@ -130,11 +141,10 @@ int main()
 	}
 	
 	for(int i = 0; i < melody.size()-1; i++){
-		//double weight = melody[i]->edges[melody[2]];
-		melody[i]->edges[melody[i+1]] += .5;
-		scaleGraphToUse->normalizeEdgeWeights(melody[i]);
+		melody[i]->edges[melody[i+1]] += .5; //Sorry for obfusction, but this accesses a pointer in the melody vector, accesses the map that is within the node, and uses the next node pointer to access the weight value between the two nodes. Then, we increment the value to increase the weighting, so that the given note sequence is more likely. This makes it so the songs has a recognizable melody
+		scaleGraphToUse->normalizeEdgeWeights(melody[i]);	//then normalizes the weights so they add to 1
 	}
-
+	//Generates the rest of the notes in the song now that the melody has been seeded. 
 	for(int j = 0; j < 120; j++){
 		// change octave possible
 		if((double)rand() / (double)RAND_MAX < 0.05)
@@ -148,6 +158,7 @@ int main()
 		notes_in_song.push_back(number);
 	}
 
+	//Outputs all of the notes for debugging purposes
 	ofstream ost;
 	ost.open("notes.txt");
 	for(int i = 0; i < notes_in_song.size(); i++){
@@ -158,6 +169,8 @@ int main()
 	int sentinel = -1;
 	ost << sentinel << endl << sentinel << endl << sentinel << endl;
 	ost.close();
+
+//NOTE: Some of the code in the following section has been adapted from code written in the Midifile library. Thanks Craig Sapp for your work.
 
 
 	// -----------  CONVERT TO MIDI SECTION ----------
@@ -177,11 +190,13 @@ int main()
    	while (ist >> tmp) {
 		note_values.push_back(tmp);
    	}
-
+	
+	//We have three different voices
    	vector<int> voice1;
    	vector<int> voice2;
    	vector<int> voice3;
 
+	//iterates through the note_value vector and adds the notes to the voices. The iterate at different rates so that the baseline is relatively constant while the melody varies more
    	for (unsigned i=0; i<note_values.size(); i+=1)
    		voice1.push_back(note_values[i]);
 
@@ -252,7 +267,9 @@ int main()
       	midievent[0] = 0x90;
       	midievent[1] = voice2[i];
       	midievent[2] += (rand() % 10) - 5;
-      	if(rand() % 100 < 3)
+      	
+	//this part of the code varies the volume by accessing midievent[2]. This is repeated for each of the tracks, which are varied differently
+	if(rand() % 100 < 3)
       		midievent[2] += (rand() % 30) - 15;
       	if(midievent[2] < 30)
       		midievent[2] = 60;
