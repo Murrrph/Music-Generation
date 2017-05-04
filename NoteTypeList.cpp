@@ -1,8 +1,18 @@
+/***
+ *
+ *This file contains the interface and implementation for the list structures we used to represent the rhythm. It contains the probability of 
+ *on the same note type, moving up to a longer note, or moving down to a shorter note. It also contains a pointer to the node below and a pointer
+ *to the node above. We used a struct containing the probabilities, pointer, and a constructor
+ *
+ * We also included a class that contains a pointer to the current Listnode of the note being used
+ ***/
+
+
 #include <iostream>
 #include <time.h>
 using namespace std;
 
-#define BASE_LIST 0
+#define BASE_LIST 0	//we had three different lists, one for each of the tracks. This was so the bass and melody had different rhythms
 #define MID_LIST 1
 #define MELODY_LIST 2
 
@@ -15,6 +25,7 @@ struct ListNode {
 	ListNode *down; // pointer to a node below
 	ListNode *up;   // pointer to a node above this one
 
+	//constructor for the struct node
 	ListNode(double t, double ps, double pd, double pu, ListNode *d, ListNode *u)
 	{
 		type = t; 
@@ -23,19 +34,20 @@ struct ListNode {
 	}
 };
 
+//contains a pointer to the current ListNode structure being used
 class NoteTypeList {
 
 	private:
 		ListNode *current; // pointer to the current ListNode of the note type being used
 
 	public:
-		NoteTypeList(int);
-		~NoteTypeList();
-		double getNextNote();
+		NoteTypeList(int);//constructor
+		~NoteTypeList();	//destructor
+		double getNextNote();	//picks the rhythm note type of the next note and returns it as a double
 
 };
 
-// Destructor
+// Destructor. Operates by moving down the list and using pointer to delete each of the nodes
 NoteTypeList::~NoteTypeList()
 {
 	if(current) // if not empty
@@ -58,9 +70,7 @@ NoteTypeList::~NoteTypeList()
 // Constructor, make half, quarter, eigth, and sixteenth note ListNodes
 NoteTypeList::NoteTypeList(int list_type)
 {
-	//ListNode *origin = 
-	//current = origin;
-
+	//"Note" that the potential weights are different depending on which track is being generated
 	if(list_type == BASE_LIST)
 	{
 		ListNode *half = new ListNode(2.0, 0.60, 0.70, 0.0, NULL, NULL);
@@ -110,28 +120,3 @@ double NoteTypeList::getNextNote()
 
 	return current->type;
 }
-
-/*int main()
-{
-	srand(time(NULL));
-
-	NoteTypeList k;
-	int half = 0, quarter = 0, eighth = 0, sixteenth = 0;
-	for(int i=0; i<1000; i++)
-	{
-		double r = k.getNextNote();
-		if(r == 2.0)
-			half++;
-		else if(r == 1.0)
-			quarter++;
-		else if(r== 0.5)
-			eighth++;
-		else
-			sixteenth++;
-	}
-	cout << "half notes: " << half << endl;
-	cout << "quarter notes: " << quarter << endl;
-	cout << "eighth notes: " << eighth << endl;
-	cout << "sixteenth notes: " << sixteenth << endl;
-	return 0;
-}*/
